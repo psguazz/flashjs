@@ -1,45 +1,45 @@
 function initFlash() {
-  const process = async (action, method, body) => {
+  const process = async (trigger, action, method, body) => {
     try {
-      {
-        const response = await fetch(action, {
-          method,
-          body,
-          headers: { "X-Requested-With": "XMLHttpRequest" },
-        });
+      trigger.dataset.submitting = "true";
 
-        const html = await response.text();
-        const temp = document.createElement("template");
-        temp.innerHTML = html.trim();
+      const response = await fetch(action, {
+        method,
+        body,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      });
 
-        const fragments = temp.content.querySelectorAll(
-          "template[flash-target]",
+      const html = await response.text();
+      const temp = document.createElement("template");
+      temp.innerHTML = html.trim();
+
+      const fragments = temp.content.querySelectorAll("template[flash-target]");
+
+      fragments.forEach((fragment) => {
+        const targetId = fragment.getAttribute("flash-target");
+        const action = fragment.getAttribute("flash-action") || "replace";
+        const target = document.getElementById(targetId);
+
+        if (!target) {
+          return;
+        }
+
+        const children = [...fragment.content.children].map((node) =>
+          node.cloneNode(true),
         );
 
-        fragments.forEach((fragment) => {
-          const targetId = fragment.getAttribute("flash-target");
-          const action = fragment.getAttribute("flash-action") || "replace";
-          const target = document.getElementById(targetId);
+        const op = {
+          append: () => target.append(...children),
+          prepend: () => target.prepend(...children),
+          update: () => target.replaceChildren(...children),
+          replace: () => target.replaceWith(...children),
+        }[action];
 
-          if (!target) {
-            return;
-          }
-
-          const children = [...fragment.content.children].map((node) =>
-            node.cloneNode(true),
-          );
-
-          const op = {
-            append: () => target.append(...children),
-            prepend: () => target.append(...children),
-            update: () => target.replaceChildren(...children),
-            replace: () => target.replaceWith(...children),
-          }[action];
-
-          op?.();
-        });
-      }
-    } catch {}
+        op?.();
+      });
+    } finally {
+      delete trigger.dataset.submitting;
+    }
   };
 
   const interceptLink = async (event) => {
@@ -50,12 +50,7 @@ function initFlash() {
     }
 
     event.preventDefault();
-
-    if (link.dataset.submitting !== "true") {
-      link.dataset.submitting = "true";
-      await process(link.href, link.dataset.flashMethod || "GET");
-      delete link.dataset.submitting;
-    }
+    await process(link, link.href, link.dataset.flashMethod || "GET");
   };
 
   const interceptForm = async (event) => {
@@ -66,12 +61,7 @@ function initFlash() {
     }
 
     event.preventDefault();
-
-    if (form.dataset.submitting !== "true") {
-      form.dataset.submitting = "true";
-      await process(form.action, form.method || "POST", new FormData(form));
-      delete form.dataset.submitting;
-    }
+    await process(form, form.action, form.method || "POST", new FormData(form));
   };
 
   document.addEventListener("submit", interceptForm);
