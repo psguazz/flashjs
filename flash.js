@@ -74,6 +74,5 @@ function initFlash() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  initSearch();
   initFlash();
 });

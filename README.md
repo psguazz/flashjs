@@ -1,6 +1,11 @@
-# Flash.js
+<div align="center">
+  <img src="./logo.png" alt="logo" height="100px">
+  <div><strong>Micro Turbo wizardry with zero dependencies and questionable boundaries.</strong></div>
+</div>
 
-This is a micro library that does Turbo-like things. Opt in by adding
+<br>
+
+This is a tiny library that does Turbo-like things. Opt in by adding
 `data-flash` to otherwise perfectly normal links and forms:
 
 ```html
