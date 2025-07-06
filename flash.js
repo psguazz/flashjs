@@ -53,7 +53,7 @@ function initFlash() {
 
     if (link.dataset.submitting !== "true") {
       link.dataset.submitting = "true";
-      await process(link.href, "GET");
+      await process(link.href, link.dataset.flashMethod || "GET");
       delete link.dataset.submitting;
     }
   };
