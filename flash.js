@@ -12,7 +12,9 @@ function initFlash() {
         const temp = document.createElement("template");
         temp.innerHTML = html.trim();
 
-        const fragments = temp.content.querySelectorAll("[flash-target]");
+        const fragments = temp.content.querySelectorAll(
+          "template[flash-target]",
+        );
 
         fragments.forEach((fragment) => {
           const targetId = fragment.getAttribute("flash-target");
@@ -23,25 +25,15 @@ function initFlash() {
             return;
           }
 
+          const children = [...fragment.content.children].map((node) =>
+            node.cloneNode(true),
+          );
+
           const op = {
-            append: () => {
-              [...fragment.content.children].forEach((node) => {
-                target.appendChild(node.cloneNode(true));
-              });
-            },
-
-            replace: () => {
-              const parent = target.parentNode;
-              if (!parent) {
-                return;
-              }
-
-              [...fragment.content.children].forEach((node) => {
-                parent.insertBefore(node.cloneNode(true), target);
-              });
-
-              parent.removeChild(target);
-            },
+            append: () => target.append(...children),
+            prepend: () => target.append(...children),
+            update: () => target.replaceChildren(...children),
+            replace: () => target.replaceWith(...children),
           }[action];
 
           op?.();
