@@ -1,5 +1,9 @@
 function initFlash() {
   const process = async (trigger, action, method, body) => {
+    if (trigger.dataset.submitting === "true") {
+      return;
+    }
+
     const message = trigger.dataset.flashConfirm;
     if (message && !window.confirm(message)) {
       return;
